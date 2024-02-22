@@ -4,71 +4,31 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QVBoxLayout,
-    QHBoxLayout,
-    QWidget,
-    QFileDialog,
     QGraphicsView,
     QGraphicsScene,
     QMessageBox,
+    QFileDialog,
 )
 import matplotlib.pyplot as plt
 import librosa
 import music21
 
-#testest
+from ui_templet import UiTemplet
+
 class AudioConverterApp(QMainWindow):
     def __init__(self):
         super().__init__()  # QMainWindow 초기화
 
-        self.init_ui()  # AudioConverterApp 초기화
+        self.ui_templet = UiTemplet()
+        self.ui_templet.setup_ui(self)
+
         # 결과 악보를 저장할 변수
         self.score = None
 
-    def init_ui(self):
-        self.setWindowTitle("Audio Converter")
-
-        # 1. 열
-        input_label = QLabel("Input Audio:")
-        self.input_line_edit = QLineEdit()
-        self.browse_button = QPushButton("Browse")
-        self.browse_button.clicked.connect(self.browse_file)
-
-        # 2. 열
-        waveform_label = QLabel("Waveform:")
-        self.waveform_view = QGraphicsView()
-        self.waveform_scene = QGraphicsScene()
-        self.waveform_view.setScene(self.waveform_scene)
-
-        # 3. 열
-        convert_button = QPushButton("Convert")
-        convert_button.clicked.connect(self.convert_audio)
-        save_button = QPushButton("Save")
-        save_button.clicked.connect(self.save_result)
-
-        # 전체 레이아웃 설정
-        layout = QHBoxLayout()
-        column_layouts = QVBoxLayout(), QVBoxLayout(), QVBoxLayout()
-        layout.addLayout(column_layouts[0])
-        layout.addLayout(column_layouts[1])
-        layout.addLayout(column_layouts[2])
-
-        column_layouts[0].addWidget(input_label)
-        column_layouts[0].addWidget(self.input_line_edit)
-        column_layouts[0].addWidget(self.browse_button)
-
-        column_layouts[1].addWidget(waveform_label)
-        column_layouts[1].addWidget(self.waveform_view)
-
-        column_layouts[2].addWidget(convert_button)
-        column_layouts[2].addWidget(save_button)
-
-        central_widget = QWidget()
-        central_widget.setLayout(layout)
-        self.setCentralWidget(central_widget)
+        # Connect button signals to slots
+        self.ui_templet.browse_button.clicked.connect(self.browse_file)
+        self.ui_templet.convert_button.clicked.connect(self.convert_audio)
+        self.ui_templet.save_button.clicked.connect(self.save_result)
 
     def browse_file(self):
         file_dialog = QFileDialog()
@@ -76,7 +36,7 @@ class AudioConverterApp(QMainWindow):
         file_dialog.exec_()
         file_paths = file_dialog.selectedFiles()
         if file_paths:
-            self.input_line_edit.setText(file_paths[0])
+            self.ui_templet.input_line_edit.setText(file_paths[0])
 
             # Display waveform
             self.display_waveform(file_paths[0])
@@ -94,12 +54,12 @@ class AudioConverterApp(QMainWindow):
         pixmap = QPixmap(image_path)
         os.remove(image_path)
 
-        self.waveform_scene.clear()
-        self.waveform_scene.addPixmap(pixmap)
+        self.ui_templet.waveform_scene.clear()
+        self.ui_templet.waveform_scene.addPixmap(pixmap)
 
     def convert_audio(self):
         # Implement audio conversion logic here
-        input_audio_path = self.input_line_edit.text()
+        input_audio_path = self.ui_templet.input_line_edit.text()
 
         if not input_audio_path:
             QMessageBox.critical(self, "Error", "Please select an input audio file.")
